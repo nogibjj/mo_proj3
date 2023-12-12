@@ -1,19 +1,28 @@
 # Databricks notebook source
 # run and import functions from other notebooks
-%run ../extract/extract
-%run ../transform/transform_data
-%run ../load_datalake/
+# %run ../extract/extract
+# %run ../transform/transform_data
+# %run ../load_datalake/
 
 # COMMAND ----------
 
 
-import os
+import sys, os
+sys.path.append(os.path.abspath('../extract/'))
+sys.path.append(os.path.abspath('../transform/'))
+# sys.path.append(os.path.abspath('../load_datalake/'))
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import col, to_date, dayofmonth, month, year
 from pyspark.sql.functions import date_format, to_timestamp
 from pyspark.sql.window import Window
 from pyspark.sql import functions as F
-from extract import extract
+from extract.extract import *
+from transform.transform_data import *
+# from load_datalake import *
+
+# COMMAND ----------
+
+spark = SparkSession.builder.appName("etl").getOrCreate()
 
 # COMMAND ----------
 
@@ -41,6 +50,11 @@ data = extract(input_file_location, file_type, infer_schema, first_row_is_header
 transformed_data = transform_date_columns(data)
 transformed_data = transform_data(transformed_data)
 transformed_data = cast_columns(transformed_data)
+
+# COMMAND ----------
+
+# display top 10 rows 
+display(transformed_data.limit(10))
 
 # COMMAND ----------
 

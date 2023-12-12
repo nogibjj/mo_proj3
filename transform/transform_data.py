@@ -1,8 +1,12 @@
-# Databricks notebook source
 from pyspark.sql import SparkSession
+from pyspark.sql.functions import date_format, to_timestamp
+from pyspark.sql.window import Window
+from pyspark.sql import functions as F
 from pyspark.sql.functions import (col, to_date, dayofmonth, month, year, 
 	date_format, to_timestamp, row_number, rank, dense_rank, count, first, 
 	last, min, max, nth_value, lag, lead, percent_rank, ntile)
+
+spark = SparkSession.builder.appName("etl").getOrCreate()
 
 def transform_date_columns(df):
     df = df.withColumn("timestamp", col("Date")).drop("Date")
@@ -21,7 +25,6 @@ def transform_data(df):
                row_number() OVER (PARTITION BY `Device Category` ORDER BY timestamp) AS row_num,
                rank() OVER (PARTITION BY `Device Category` ORDER BY timestamp) AS rank,
                dense_rank() OVER (PARTITION BY `Device Category` ORDER BY timestamp) AS dense_rank,
-               count() OVER (PARTITION BY `Device Category` ORDER BY timestamp) AS count,
                first(`# of Visitors`) OVER (PARTITION BY `Device Category` ORDER BY timestamp) AS first,
                last(`# of Visitors`) OVER (PARTITION BY `Device Category` ORDER BY timestamp) AS last,
                min(`# of Visitors`) OVER (PARTITION BY `Device Category` ORDER BY timestamp) AS min,

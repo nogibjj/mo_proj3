@@ -33,4 +33,3 @@ def extract(input_file_location, file_type, infer_schema="false", first_row_is_h
     )
 
     return data
-
