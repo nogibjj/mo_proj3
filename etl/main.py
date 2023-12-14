@@ -1,24 +1,17 @@
-# Databricks notebook source
-# run and import functions from other notebooks
-# %run ../extract/extract
-# %run ../transform/transform_data
-# %run ../load_datalake/
+'''
+This is the main script for the ETL pipeline.
+It will extract the data from the source, transform it, and load it to the data lake.
+'''
+import sys
+import os
+from pyspark.sql import SparkSession
+from extract.extract import extract
+from transform.transform_data import (transform_date_columns,
+                                      transform_data, cast_columns)
 
-# COMMAND ----------
-
-
-import sys, os
 sys.path.append(os.path.abspath('../extract/'))
 sys.path.append(os.path.abspath('../transform/'))
-# sys.path.append(os.path.abspath('../load_datalake/'))
-from pyspark.sql import SparkSession
-from pyspark.sql.functions import col, to_date, dayofmonth, month, year
-from pyspark.sql.functions import date_format, to_timestamp
-from pyspark.sql.window import Window
-from pyspark.sql import functions as F
-from extract.extract import *
-from transform.transform_data import *
-# from load_datalake import *
+
 
 # COMMAND ----------
 
@@ -33,12 +26,13 @@ spark = SparkSession.builder.appName("etl").getOrCreate()
 
 # Example usage
 input_file_location = "/FileStore/tables/lacity_org_website_traffic.csv"
+output_file_location = "/FileStore/tables/lacity_org_website_traffic_delta"
 file_type = "csv"
 infer_schema = "false"
 first_row_is_header = "true"
 delimiter = ","
-data = extract(input_file_location, file_type, infer_schema, first_row_is_header, delimiter)
-
+data = extract(input_file_location, file_type, infer_schema,
+               first_row_is_header, delimiter)
 
 # COMMAND ----------
 
@@ -53,8 +47,8 @@ transformed_data = cast_columns(transformed_data)
 
 # COMMAND ----------
 
-# display top 10 rows 
-display(transformed_data.limit(10))
+# display top 10 rows
+#display(transformed_data.limit(10))
 
 # COMMAND ----------
 
@@ -66,4 +60,6 @@ display(transformed_data.limit(10))
 file_type = "delta"
 first_row_is_header = "true"
 delimiter = ","
-write_to_deltalake(transformed_data, output_file_location, file_type, first_row_is_header, delimiter)
+# Uncoment the following line to write to Delta Lake databricks
+# write_to_deltalake(transformed_data, output_file_location, file_type,
+#                    first_row_is_header, delimiter)
